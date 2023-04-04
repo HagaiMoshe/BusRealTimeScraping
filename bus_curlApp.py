@@ -7,7 +7,7 @@ def invertString(string: str):
 
 
 stationInfo_type = namedtuple("stationInfo_type", "number name")
-BusInfo_type = namedtuple("BusInfo_type", "lineNumber destination ETA")
+BusInfo_type = namedtuple("BusInfo_type", "lineNumber destination ETA isRealTime")
 
 def getBusTimeTable(stationNumber: int) -> tuple[stationInfo_type, list[BusInfo_type]]:
     CURLBUS_URL = "https://curlbus.app"
@@ -38,7 +38,8 @@ def getBusTimeTable(stationNumber: int) -> tuple[stationInfo_type, list[BusInfo_
         ETA = datetime.strptime(bus['eta'][:-6], '%Y-%m-%d %H:%M:%S') # convert the string to datatime object
         ETA = (ETA - now).total_seconds() #the time left for arrival in seconds
         ETA = round(ETA /60) #the time left for arrival in minutes
-        busInfo = BusInfo_type(number, desitnation, ETA)
+        isRealTime = False if bus['location'] is None else True
+        busInfo = BusInfo_type(number, desitnation, ETA, isRealTime)
         busInfoList.append(busInfo)
 
     return (stationInfo, busInfoList)
@@ -54,5 +55,5 @@ if __name__ == '__main__':
     station, busInfoList = getBusTimeTable(stationNumber)
     print(f"station: {station.number} {station.name}")
     for busInfo in busInfoList:
-        print(f"--line number: {busInfo.lineNumber}\n  destination: {busInfo.destination}\n  ETA: {busInfo.ETA}")
+        print(f"--line number: {busInfo.lineNumber}\n  destination: {busInfo.destination}\n  ETA: {busInfo.ETA}\n  isRealTime: {busInfo.isRealTime}")
 
